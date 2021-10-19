@@ -48,6 +48,14 @@ namespace S3CreateAndList
       {
         Console.WriteLine(b.BucketName);
       }
+
+      var request = new PutObjectRequest
+      {
+        BucketName = "screenshot-unity",
+        Key = "calvin-upload-test",
+        ContentBody = "deadbeaf"
+      };
+      var response = await s3Client.PutObjectAsync(request);
     }
 
 
