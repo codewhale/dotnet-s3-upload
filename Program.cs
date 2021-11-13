@@ -5,6 +5,12 @@ using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
 
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
+using Amazon;
+
+using System.Collections.Generic;
+
 namespace S3CreateAndList
 {
   class Program
@@ -56,10 +62,63 @@ namespace S3CreateAndList
         ContentBody = "deadbeaf"
       };
       var response = await s3Client.PutObjectAsync(request);
+
+      /* create dynamoDB table */
+      AmazonDynamoDBClient client = new AmazonDynamoDBClient();
+      string tableName = "ProductCatalog";
+/* can only create once
+
+      var tbl_request = new CreateTableRequest
+      {
+        TableName = tableName,
+        AttributeDefinitions = new List<AttributeDefinition>()
+        {
+          new AttributeDefinition
+          {
+            AttributeName = "Id",
+            AttributeType = "N"
+          }
+        },
+        KeySchema = new List<KeySchemaElement>()
+        {
+          new KeySchemaElement
+          {
+            AttributeName = "Id",
+            KeyType = "HASH"  //Partition key
+          }
+        },
+        ProvisionedThroughput = new ProvisionedThroughput
+        {
+          ReadCapacityUnits = 10,
+          WriteCapacityUnits = 5
+        }
+      };
+      var tbl_response = await client.CreateTableAsync(tbl_request);
+*/
+
+      /* put dynamoDB item */
+      var item_request = new PutItemRequest
+      {
+         TableName = tableName,
+         Item = new Dictionary<string, AttributeValue>()
+            {
+                { "Id", new AttributeValue { N = "202" }},
+                { "Title", new AttributeValue { S = "Book 202 Title" }},
+                { "ISBN", new AttributeValue { S = "11-11-11-11" }},
+                { "Price", new AttributeValue { S = "20.00" }},
+                {
+                  "Authors",
+                  new AttributeValue
+                  { SS = new List<string>{"Author1", "Author2"}   }
+                }
+            }
+      };
+      var item_response = await client.PutItemAsync(item_request);
+
     }
 
 
-    // 
+    //
     // Method to parse the command line.
     private static Boolean GetBucketName(string[] args, out String bucketName)
     {
