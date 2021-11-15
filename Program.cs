@@ -115,6 +115,29 @@ namespace S3CreateAndList
       };
       var item_response = await client.PutItemAsync(item_request);
 
+      /* update request */
+      var update_request = new UpdateItemRequest
+      {
+          TableName = tableName,
+          Key = new Dictionary<string,AttributeValue>() { { "Id", new AttributeValue { N = "201" } } },
+          ExpressionAttributeNames = new Dictionary<string,string>()
+          {
+              {"#A", "Authors"},
+          },
+          ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+          {
+              {":auth",new AttributeValue { SS = {"Author YY","Author ZZ"}}},
+          },
+
+          // This expression does the following:
+          // 1) Adds two new authors to the list
+          // 2) Reduces the price
+          // 3) Adds a new attribute to the item
+          // 4) Removes the ISBN attribute from the item
+          UpdateExpression = "ADD #A :auth"
+      };
+      var update_response = await client.UpdateItemAsync(update_request);
+
     }
 
 
